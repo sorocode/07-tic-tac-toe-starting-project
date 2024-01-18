@@ -2,6 +2,12 @@ import { useState } from "react";
 import Player from "./components/Player";
 import GameBoard from "./components/\bGameboard";
 import Log from "./components/Log";
+import { WINNING_COMBINATIONS } from "./winning-combination";
+const initialGameBoard = [
+  [null, null, null],
+  [null, null, null],
+  [null, null, null],
+];
 
 function deriveActivePlayers(gameTurns) {
   let currentPlayer = "X";
@@ -13,8 +19,34 @@ function deriveActivePlayers(gameTurns) {
 
 function App() {
   const [gameTurns, setGameTurns] = useState([]);
+  // const [hasWinner, setHasWinner] = useState(false);
   // const [activePlayer, setActivePlayer] = useState("X");
+
   const activePlayer = deriveActivePlayers(gameTurns);
+  let gameBoard = initialGameBoard;
+  let winner;
+  for (const turn of gameTurns) {
+    const { square, player } = turn;
+    const { row, col } = square;
+
+    gameBoard[row][col] = player;
+  }
+  for (const combination of WINNING_COMBINATIONS) {
+    const firstSquareSymbol =
+      gameBoard[combination[0].row][combination[0].column];
+    const secondSquareSymbol =
+      gameBoard[combination[1].row][combination[1].column];
+    const thirdSquareSymbol =
+      gameBoard[combination[2].row][combination[2].column];
+
+    if (
+      firstSquareSymbol &&
+      firstSquareSymbol === secondSquareSymbol &&
+      firstSquareSymbol === thirdSquareSymbol
+    ) {
+      winner = firstSquareSymbol;
+    }
+  }
   function selectSquareHandler(rowIndex, colIndex) {
     // setActivePlayer((curActivePlayer) => (curActivePlayer === "X" ? "O" : "X"));
     setGameTurns((prevTurns) => {
@@ -41,10 +73,12 @@ function App() {
             isActive={activePlayer === "O"}
           />
         </ol>
+        {winner && <p>You won, {winner}!</p>}
         <GameBoard
           onSelectSquare={selectSquareHandler}
-          activePlayerSymbol={activePlayer}
+          // activePlayerSymbol={activePlayer}
           turns={gameTurns}
+          board={gameBoard}
         />
       </div>
       <Log turns={gameTurns} />
